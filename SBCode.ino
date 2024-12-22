@@ -5,8 +5,8 @@ int IRVal = 0;
 //Ultrasonic Sensor
 #define echo 3
 #define trig 4
-float duration = 0.0;
-float time = 0.0;
+float duration = 0.0; //Not sure what dis for
+float time = 0.0; //In seconds
 
 #define motorLF 6 //Left motor definition
 #define motorLB 9 //F/B for Forwards/Backwards
