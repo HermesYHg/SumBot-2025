@@ -1,21 +1,60 @@
+// IR Sensor
+#define IRSensor 2;
+int IRVal = 0;
+
+//Ultrasonic Sensor
+#define echo 3
+#define trig 4
+float duration = 0.0;
+float time = 0.0;
 
 #define motorLF 6 //Left motor definition
 #define motorLB 9 //F/B for Forwards/Backwards
 
 #define motorRF 10 //Right motor definition
 #define motorRB 11
-void setup() {
 
+void setup() {
 pinMode(motorLF, OUTPUT); //Left motor initialization
 pinMode(motorLB, OUTPUT);
 
 pinMode(motorRF, OUTPUT); //Right motor initialization
 pinMode(motorRB, OUTPUT);
+
+pinMode(IRSensor, INPUT);
+
+pinMode(echo, INPUT); //Echo receives reflected wave
+pinMode(trig, OUTPUT); //Trigger outputs sound wave signal to hit objects
+
+Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  //IR Sensor Stuff
+  IRVal = digitalRead(IRSensor); //read IR sensor 
+  Serial.println(IRVal); //For test checks
 
+  if (IRVal == HIGH){ //If IR light reflected (white surface)
+
+  }
+  else if (IRVal == LOW){ //If IR light absorbed (black surface)
+
+  }
+
+  //Ultrasonic Sensor Stuff
+  digitalWrite(trig, LOW); //Clear trig pin
+  delay(2); //wait 2ms
+  digitalWrite(trig, HIGH) //Send out signal
+  delay(10);
+  digitalWrite(trig, LOW);
+
+  time = pulseIN(echo, HIGH); //Read echo pin
+  dist = time * 0.0343 / 2; //Distance calculation
+
+  Serial.println("Distance: ");
+  Serial.println(dist);
+
+  delay(1000); //Wait for 1s
 }
 
 void moveForward() {
@@ -63,7 +102,7 @@ void turnR(int spd){
   analogWrite(motorRB, spd);
 }
 
-void stopMotor(){
+void stop(){
   digitalWrite(motorLF, LOW) 
   digitalWrite(motorLB, LOW)
 
@@ -71,4 +110,11 @@ void stopMotor(){
   digitalWrite(motorLB, LOW)
 }
 
-//Testing git changes
+void movement(){ //Ultrasonic range 2cm~4m
+  if (dist < 15 && dist > 2){ //If opps in view, atk them or sum
+
+  }
+  else { //Dick around
+
+  }
+}
