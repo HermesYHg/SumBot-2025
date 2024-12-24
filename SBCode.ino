@@ -1,88 +1,76 @@
-// IR Sensor
+// https://www.sumobot.ca/competition?rules=Beginner
+// IR Sensor Definition
 #define IRSensor 2;
 int IRVal = 0;
 
-//Ultrasonic Sensor
+//Ultrasonic Sensor Def
 #define echo 3
 #define trig 4
-float duration = 0.0; //Not sure what dis for
-float time = 0.0; //In seconds
+float dist = 0.0; //In cm
+float time = 0.0; //In micro seconds?
 
-#define motorLF 6 //Left motor definition
-#define motorLB 9 //F/B for Forwards/Backwards
-
-#define motorRF 10 //Right motor definition
+//Motors Def
+#define motorLF 6 //Left/Right, Forwards/Backwards
+#define motorLB 9 
+#define motorRF 10 
 #define motorRB 11
 
 void setup() {
-pinMode(motorLF, OUTPUT); //Left motor initialization
-pinMode(motorLB, OUTPUT);
-
-pinMode(motorRF, OUTPUT); //Right motor initialization
-pinMode(motorRB, OUTPUT);
-
+//Initialization
 pinMode(IRSensor, INPUT);
 
 pinMode(echo, INPUT); //Echo receives reflected wave
 pinMode(trig, OUTPUT); //Trigger outputs sound wave signal to hit objects
 
+pinMode(motorLF, OUTPUT); 
+pinMode(motorLB, OUTPUT);
+pinMode(motorRF, OUTPUT); 
+pinMode(motorRB, OUTPUT);
+
 Serial.begin(9600);
+delay(5000); //5s delay at start
 }
 
 void loop() {
+  ultraInstinct(); //Calc distance from opps
+  movement(); //Decide what to do based on calculated dist
+
   //IR Sensor Stuff
   IRVal = digitalRead(IRSensor); //read IR sensor 
   Serial.println(IRVal); //For test checks
 
-  if (IRVal == HIGH){ //If IR light reflected (white surface)
+  if (IRVal == HIGH){ //IR light reflected (white surface aka border)
 
   }
-  else if (IRVal == LOW){ //If IR light absorbed (black surface)
+  else if (IRVal == LOW){ //IR light absorbed (black surface)
 
   }
-
-  //Ultrasonic Sensor Stuff
-  digitalWrite(trig, LOW); //Clear trig pin
-  delay(2); //wait 2ms
-  digitalWrite(trig, HIGH) //Send out signal
-  delay(10);
-  digitalWrite(trig, LOW);
-
-  time = pulseIN(echo, HIGH); //Read echo pin
-  dist = time * 0.0343 / 2; //Distance calculation
-
-  Serial.println("Distance: ");
-  Serial.println(dist);
-
-  delay(1000); //Wait for 1s
 }
 
-void moveForward() {
+void forward() {
   digitalWrite(motorLF, HIGH) //Current flows one way to turn wheels forward
   digitalWrite(motorLB, LOW)
-
   digitalWrite(motorRF, HIGH)
-  digitalWrite(motorLB, LOW)
+  digitalWrite(motorRB, LOW)
 }
-void moveBackward(){
+
+void backward(){
   digitalWrite(motorLF, LOW) //Reverse current direction to turn wheels backward
   digitalWrite(motorLB, HIGH)
-
   digitalWrite(motorRF, LOW)
-  digitalWrite(motorLB, HIGH)
+  digitalWrite(motorRB, HIGH)
 }
 
 void forwardSpd(int spd){ //Signal from 0-255, 255 = 100% speed
   analogWrite(motorLF, spd);
   analogWrite(motorLB, 0);
-
   analogWrite(motorRF, spd);
   analogWrite(motorRB, 0);
 }
+
 void backwardSpd(int spd){ 
   analogWrite(motorLF, 0);
   analogWrite(motorLB, spd);
-
   analogWrite(motorRF, 0);
   analogWrite(motorRB, spd);
 }
@@ -90,14 +78,13 @@ void backwardSpd(int spd){
 void turnL(int spd){ //Left wheel moves back, right wheel moves forward to turn left
   analogWrite(motorLF, 0);
   analogWrite(motorLB, spd);
-
   analogWrite(motorRF, spd);
   analogWrite(motorRB, 0);
 }
+
 void turnR(int spd){
   analogWrite(motorLF, spd);
   analogWrite(motorLB, 0);
-
   analogWrite(motorRF, 0);
   analogWrite(motorRB, spd);
 }
@@ -105,9 +92,8 @@ void turnR(int spd){
 void stop(){
   digitalWrite(motorLF, LOW) 
   digitalWrite(motorLB, LOW)
-
   digitalWrite(motorRF, LOW)
-  digitalWrite(motorLB, LOW)
+  digitalWrite(motorRB, LOW)
 }
 
 void movement(){ //Ultrasonic range 2cm~4m
@@ -117,4 +103,19 @@ void movement(){ //Ultrasonic range 2cm~4m
   else { //Dick around
 
   }
+} 
+
+void ultraInstinct(){ //Calc distance w/ ultrasonic sensor (calc is short for calculator)
+  digitalWrite(trig, LOW); //Clear trig pin
+  delay(2);
+  digitalWrite(trig, HIGH) //Send out signal
+  delay(10);
+  digitalWrite(trig, LOW);
+
+  time = pulseIN(echo, HIGH); //Read echo pin
+  dist = time * 0.0343 / 2; //Distance calculation (c = 0,0343 cm/us, div by 2 for time spent sending and returning)
+
+  Serial.println("Distance: ");
+  Serial.println(dist);
+
 }
