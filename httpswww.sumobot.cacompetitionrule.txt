@@ -33,20 +33,24 @@ delay(5000); //5s delay at start
 
 void loop() {
   ultraInstinct(); //Calc distance from opps
-  movement(); //Decide what to do based on calculated dist
-
-  //IR Sensor Stuff
   IRVal = digitalRead(IRSensor); //read IR sensor 
   Serial.println(IRVal); //For test checks
 
   if (IRVal == HIGH){ //IR light reflected (white surface aka border)
-
+    Serial.println("BORDER DETECTED");
+    backwardSpd(150);
+    delay(500);
+    turnL(150);
+    delay(300);
+    stop();
   }
   else if (IRVal == LOW){ //IR light absorbed (black surface)
-
+    //PROBLEM: CANNOT USE DELAY OR IT MESSES WITH SENSORING
+    movement();
   }
 }
 
+//movement
 void forward() {
   digitalWrite(motorLF, HIGH) //Current flows one way to turn wheels forward
   digitalWrite(motorLB, LOW)
@@ -98,12 +102,54 @@ void stop(){
 
 void movement(){ //Ultrasonic range 2cm~4m
   if (dist < 15 && dist > 2){ //If opps in view, atk them or sum
-
+    Serial.println("OPPONENT DETECTED");
+    straightAttack(); //<-straight attack for now (update when we have strategy)
   }
-  else { //Dick around
-
+  else { //Moving along the edge of the border
+    Serial.println("Moving along the edge...");
+    forwardSpd(150);
+    delay(200);
+    turnR(100);
+    delay(150);
   }
+  stop();
+  delay(50);
 } 
+
+//ATTACK METHODS (q: how does it sense the positioning of the other bot,, assuming other bot will also move)
+//delays are included atm to move the bot
+void straightAttack() {
+  forwardSpd(200);
+  delay(500);
+}
+void tBoneAttack(){
+  //turn
+  turnR(150);
+  delay(300);
+  stop();
+  //hit
+  forwardSpd(200);
+  delay(500);
+}
+void attackFromBehind() {
+  //turn
+  turnL(150);
+  delay(400);
+
+  //backwards???
+  backwardSpd(200);
+  turnL(150);
+  delay(400);
+
+  //hit
+  forward();
+  delay(500);
+}
+
+//makes sure bot does not go out of border while executing commands
+void checkSensor() {
+  //function to check sensors while moving (called after the movement before the delay?)
+}
 
 void ultraInstinct(){ //Calc distance w/ ultrasonic sensor (calc is short for calculator)
   digitalWrite(trig, LOW); //Clear trig pin
