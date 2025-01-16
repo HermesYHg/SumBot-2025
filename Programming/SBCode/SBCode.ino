@@ -38,11 +38,7 @@ void loop() {
 
   if (IRVal == HIGH){ //IR light reflected (white surface aka border)
     Serial.println("BORDER DETECTED");
-    backwardSpd(150);
-    delay(500);
-    turnL(150);
-    delay(300);
-    stop();
+    awayFromBorder();
   }
   else if (IRVal == LOW){ //IR light absorbed (black surface)
     //PROBLEM: CANNOT USE DELAY OR IT MESSES WITH SENSORING
@@ -100,10 +96,19 @@ void stop(){
   digitalWrite(motorRB, LOW)
 }
 
+//moves bot away from border if detected
+void awayFromBorder () {
+    backwardSpd(150);
+    delay(500);
+    turnL(150);
+    delay(300);
+    stop();
+}
+
 void movement(){ //Ultrasonic range 2cm~4m
-  if (dist < 15 && dist > 2){ //If opps in view, atk them or sum
+  if (dist < 30 && dist > 2){ //If opps in view, atk them or sum
     Serial.println("OPPONENT DETECTED");
-    straightAttack(); //<-straight attack for now (update when we have strategy)
+    chooseAttack(); //<-straight attack for now (update when we have strategy)
   }
   else { //Moving along the edge of the border
     Serial.println("Moving along the edge...");
@@ -116,11 +121,37 @@ void movement(){ //Ultrasonic range 2cm~4m
   delay(50);
 } 
 
+//choosing which attack method to use
+void chooseAttack() {
+    if (dist < 10) {
+        Serial.println("t-bone attack");
+        tBoneAttack();
+    } 
+    else if (dist >= 10 && dist <= 20) {
+        Serial.println("straight attack");
+        straightAttack();
+    } 
+    else if (dist > 20 && dist <= 30) {
+        Serial.println("attack from behind");
+        attackFromBehind();
+    } 
+    else {
+        Serial.println("just moving around");
+        movement();
+    }
+}
+
 //ATTACK METHODS (q: how does it sense the positioning of the other bot,, assuming other bot will also move)
 //delays are included atm to move the bot
 void straightAttack() {
   forwardSpd(200);
-  delay(500);
+  delay(100);
+  if (digitalRead(IRSensor) == HIGH) { // Border detected
+    Serial.println("BORDER DETECTED DURING ATTACK!");
+    awayFromBorder();
+    return;
+  }
+  stop();
 }
 void tBoneAttack(){
   //turn
@@ -130,6 +161,13 @@ void tBoneAttack(){
   //hit
   forwardSpd(200);
   delay(500);
+
+  if (digitalRead(IRSensor) == HIGH) { // Border detected
+    Serial.println("BORDER DETECTED DURING ATTACK!");
+    awayFromBorder();
+    return;
+  }
+  stop();
 }
 void attackFromBehind() {
   //turn
@@ -144,11 +182,13 @@ void attackFromBehind() {
   //hit
   forward();
   delay(500);
-}
 
-//makes sure bot does not go out of border while executing commands
-void checkSensor() {
-  //function to check sensors while moving (called after the movement before the delay?)
+  if (digitalRead(IRSensor) == HIGH) { // Border detected
+    Serial.println("BORDER DETECTED DURING ATTACK!");
+    awayFromBorder();
+    return;
+  }
+  stop();
 }
 
 void ultraInstinct(){ //Calc distance w/ ultrasonic sensor (calc is short for calculator)
