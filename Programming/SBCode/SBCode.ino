@@ -15,8 +15,8 @@ float time = 0.0; //In micro seconds?
 #define motorRF 10 
 #define motorRB 11
 
+//initialization
 void setup() {
-//Initialization
 pinMode(IRSensor, INPUT);
 
 pinMode(echo, INPUT); //Echo receives reflected wave
@@ -31,6 +31,7 @@ Serial.begin(9600);
 delay(5000); //5s delay at start
 }
 
+//loop
 void loop() {
   ultraInstinct(); //Calc distance from opps
   IRVal = digitalRead(IRSensor); //read IR sensor 
@@ -108,7 +109,7 @@ void awayFromBorder () {
 void movement(){ //Ultrasonic range 2cm~4m
   if (dist < 30 && dist > 2){ //If opps in view, atk them or sum
     Serial.println("OPPONENT DETECTED");
-    chooseAttack(); //<-straight attack for now (update when we have strategy)
+    chooseAttack();
   }
   else { //Moving along the edge of the border
     Serial.println("Moving along the edge...");
@@ -142,7 +143,6 @@ void chooseAttack() {
 }
 
 //ATTACK METHODS (q: how does it sense the positioning of the other bot,, assuming other bot will also move)
-//delays are included atm to move the bot
 void straightAttack() {
   forwardSpd(200);
   delay(100);
